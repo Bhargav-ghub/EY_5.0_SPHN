@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Northstar Market | Product discovery</title>
+	<style>
+		:root {
+			--ink: #18211f;
+			--muted: #6e7975;
+			--paper: #f5f4ef;
+			--card: #fffdf8;
+			--line: #dfe4de;
+			--green: #0f6b52;
+			--green-dark: #084936;
+			--coral: #ed765f;
+			--shadow: 0 18px 50px rgba(24, 33, 31, .08);
+		}
+
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			color: var(--ink);
+			background: var(--paper);
+			font-family: Georgia, 'Times New Roman', serif;
+		}
+		button, input, select { font: inherit; }
+		button { cursor: pointer; }
+		.topbar {
+			padding: 22px clamp(20px, 5vw, 76px);
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom: 1px solid var(--line);
+			background: rgba(245, 244, 239, .88);
+		}
+		.brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: .04em; }
+		.mark { width: 28px; height: 28px; border-radius: 50% 50% 50% 7px; background: var(--coral); transform: rotate(-45deg); }
+		.brand span { transform: translateX(-2px); }
+		.cart { border: 0; background: none; color: var(--green-dark); font-family: Arial, sans-serif; font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+		.cart b { display: inline-grid; place-items: center; width: 25px; height: 25px; margin-left: 7px; border-radius: 50%; color: white; background: var(--green); }
+		main { max-width: 1280px; margin: 0 auto; padding: 66px clamp(20px, 5vw, 76px) 88px; }
+		.intro { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; margin-bottom: 48px; }
+		.eyebrow { margin: 0 0 14px; color: var(--coral); font: 700 .72rem/1 Arial, sans-serif; letter-spacing: .17em; text-transform: uppercase; }
+		h1 { max-width: 620px; margin: 0; font-size: clamp(3rem, 6.5vw, 6.5rem); line-height: .88; letter-spacing: -.07em; font-weight: 500; }
+		.intro-copy { max-width: 355px; justify-self: end; color: var(--muted); font: 1rem/1.6 Arial, sans-serif; }
+		.toolbar { display: flex; justify-content: space-between; gap: 15px; align-items: center; padding: 16px 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--line); font-family: Arial, sans-serif; }
+		.search-wrap { position: relative; flex: 1; max-width: 380px; }
+		.search-wrap::before { content: '⌕'; position: absolute; top: 9px; left: 13px; color: var(--muted); font-size: 1.4rem; }
+		input, select { border: 1px solid var(--line); border-radius: 4px; background: var(--card); color: var(--ink); outline-color: var(--coral); }
+		input { width: 100%; padding: 12px 14px 12px 38px; }
+		select { padding: 12px 34px 12px 13px; }
+		.status { margin: 25px 0 16px; color: var(--muted); font: .76rem Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+		.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+		.product { min-width: 0; animation: rise .5s both; }
+		.product-image { display: grid; place-items: center; aspect-ratio: 1 / 1.12; padding: 28px; border: 1px solid var(--line); border-radius: 5px; background: var(--card); transition: transform .25s, box-shadow .25s; }
+		.product:hover .product-image { transform: translateY(-5px); box-shadow: var(--shadow); }
+		.product-image img { width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply; }
+		.product-meta { padding-top: 14px; }
+		.category { color: var(--coral); font: 700 .66rem Arial, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+		.product h2 { margin: 7px 0 10px; font-size: 1.05rem; line-height: 1.2; font-weight: 500; }
+		.price-row { display: flex; justify-content: space-between; align-items: center; font-family: Arial, sans-serif; }
+		.price { color: var(--green); font-size: .92rem; font-weight: 700; }
+		.rating { color: var(--muted); font-size: .75rem; }
+		.empty, .error { grid-column: 1 / -1; padding: 70px 20px; text-align: center; font-family: Arial, sans-serif; color: var(--muted); }
+		.error { color: #a53e2d; }
+		.retry { margin-top: 12px; padding: 11px 17px; border: 0; border-radius: 4px; color: white; background: var(--green); }
+		dialog { width: min(680px, calc(100% - 32px)); padding: 0; border: 0; border-radius: 5px; color: var(--ink); background: var(--card); box-shadow: 0 24px 80px rgba(0,0,0,.25); }
+		dialog::backdrop { background: rgba(8, 73, 54, .35); backdrop-filter: blur(4px); }
+		.dialog-body { display: grid; grid-template-columns: .8fr 1.2fr; gap: 30px; padding: 34px; }
+		.dialog-body img { width: 100%; height: 300px; object-fit: contain; mix-blend-mode: multiply; }
+		.close { float: right; border: 0; background: none; color: var(--muted); font: 1.4rem Arial, sans-serif; }
+		.dialog-body h2 { margin: 12px 0; font-size: 2rem; line-height: 1; font-weight: 500; }
+		.dialog-body p { color: var(--muted); font: .93rem/1.6 Arial, sans-serif; }
+		@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+		@media (max-width: 850px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+		@media (max-width: 620px) { .topbar { padding: 18px 20px; } main { padding-top: 44px; } .intro { display: block; } .intro-copy { margin-top: 25px; } .toolbar { align-items: stretch; flex-direction: column; } .search-wrap { max-width: none; } .grid { grid-template-columns: repeat(2, 1fr); gap: 22px 14px; } .product-image { padding: 18px; } .dialog-body { display: block; padding: 25px; } .dialog-body img { height: 220px; } }
+	</style>
+</head>
+<body>
+	<header class="topbar">
+		<div class="brand"><i class="mark" aria-hidden="true"></i><span>NORTHSTAR MARKET</span></div>
+		<button class="cart" type="button" aria-label="Shopping bag">Bag <b id="cartCount">0</b></button>
+	</header>
+
+	<main>
+		<section class="intro">
+			<div><p class="eyebrow">The everyday edit</p><h1>Good things,<br>well found.</h1></div>
+			<p class="intro-copy">A considered collection of pieces for living, giving, and making a little more room for delight.</p>
+		</section>
+		<section class="toolbar" aria-label="Product controls">
+			<div class="search-wrap"><input id="search" type="search" placeholder="Search the collection..." aria-label="Search products"></div>
+			<select id="category" aria-label="Filter by category"><option value="all">All categories</option></select>
+			<select id="sort" aria-label="Sort products"><option value="featured">Sort: Featured</option><option value="low">Price: Low to high</option><option value="high">Price: High to low</option><option value="rating">Top rated</option></select>
+		</section>
+		<p class="status" id="status">Loading collection...</p>
+		<section class="grid" id="products" aria-live="polite"></section>
+	</main>
+
+	<dialog id="productDialog">
+		<div class="dialog-body"><div><img id="dialogImage" alt=""></div><div><button class="close" id="closeDialog" aria-label="Close">×</button><span class="category" id="dialogCategory"></span><h2 id="dialogTitle"></h2><strong class="price" id="dialogPrice"></strong><p id="dialogDescription"></p><button class="retry" id="addToBag" type="button">Add to bag</button></div></div>
+	</dialog>
+
+	<script>
+		const API_URL = 'https://fakestoreapi.com/products';
+		const state = { products: [], filtered: [], bag: 0 };
+		const productsEl = document.querySelector('#products');
+		const statusEl = document.querySelector('#status');
+		const categoryEl = document.querySelector('#category');
+		const searchEl = document.querySelector('#search');
+		const sortEl = document.querySelector('#sort');
+		const dialog = document.querySelector('#productDialog');
+
+		const titleCase = value => value.toLowerCase().replace(/(^|[\s-])\w/g, letter => letter.toUpperCase());
+		const money = value => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+
+		function render() {
+			const query = searchEl.value.toLowerCase().trim();
+			const category = categoryEl.value;
+			state.filtered = state.products.filter(product =>
+				(category === 'all' || product.category === category) &&
+				product.title.toLowerCase().includes(query)
+			);
+			const sort = sortEl.value;
+			if (sort === 'low') state.filtered.sort((a, b) => a.price - b.price);
+			if (sort === 'high') state.filtered.sort((a, b) => b.price - a.price);
+			if (sort === 'rating') state.filtered.sort((a, b) => b.rating.rate - a.rating.rate);
+			statusEl.textContent = `${state.filtered.length} ${state.filtered.length === 1 ? 'piece' : 'pieces'} found`;
+			productsEl.innerHTML = state.filtered.length ? state.filtered.map((product, index) => `
+				<article class="product" style="animation-delay:${index * 45}ms" data-id="${product.id}" tabindex="0">
+					<div class="product-image"><img src="${product.image}" alt="${product.title}" loading="lazy"></div>
+					<div class="product-meta"><span class="category">${titleCase(product.category)}</span><h2>${product.title}</h2><div class="price-row"><span class="price">${money(product.price)}</span><span class="rating">★ ${product.rating.rate} (${product.rating.count})</span></div></div>
+				</article>`).join('') : '<p class="empty">No pieces match that search.</p>';
+		}
+
+		async function loadProducts() {
+			statusEl.textContent = 'Loading collection...';
+			productsEl.innerHTML = '';
+			try {
+				const response = await fetch(API_URL);
+				if (!response.ok) throw new Error('The collection could not be reached.');
+				state.products = await response.json();
+				[...new Set(state.products.map(product => product.category))].sort().forEach(category => {
+					categoryEl.insertAdjacentHTML('beforeend', `<option value="${category}">${titleCase(category)}</option>`);
+				});
+				render();
+			} catch (error) {
+				statusEl.textContent = 'Unable to load collection';
+				productsEl.innerHTML = `<div class="error">${error.message}<br><button class="retry" id="retry" type="button">Try again</button></div>`;
+				document.querySelector('#retry').addEventListener('click', loadProducts);
+			}
+		}
+
+		function openProduct(product) {
+			document.querySelector('#dialogImage').src = product.image;
+			document.querySelector('#dialogImage').alt = product.title;
+			document.querySelector('#dialogCategory').textContent = titleCase(product.category);
+			document.querySelector('#dialogTitle').textContent = product.title;
+			document.querySelector('#dialogPrice').textContent = money(product.price);
+			document.querySelector('#dialogDescription').textContent = product.description;
+			dialog.showModal();
+		}
+
+		[searchEl, categoryEl, sortEl].forEach(control => control.addEventListener('input', render));
+		productsEl.addEventListener('click', event => {
+			const card = event.target.closest('[data-id]');
+			if (card) openProduct(state.products.find(product => product.id === Number(card.dataset.id)));
+		});
+		document.querySelector('#closeDialog').addEventListener('click', () => dialog.close());
+		document.querySelector('#addToBag').addEventListener('click', event => {
+			state.bag += 1;
+			document.querySelector('#cartCount').textContent = state.bag;
+			event.target.textContent = 'Added to bag';
+			setTimeout(() => { event.target.textContent = 'Add to bag'; }, 1200);
+		});
+		loadProducts();
+	</script>
+</body>
+</html>
